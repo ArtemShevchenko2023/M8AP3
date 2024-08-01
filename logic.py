@@ -3,9 +3,24 @@ import requests
 from config import *
 import time
 import base64
+import telebot
 from PIL import Image
 from io import BytesIO
+import datetime
 import sqlite3
+def init_db():
+    conn = sqlite3.connect('feedback.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS feedback (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        feedback TEXT,
+        timestamp TEXT
+    )
+    ''')
+    conn.commit()
+    conn.close()
 def create_database():
     conn = sqlite3.connect('chatbot.db')
     cursor = conn.cursor()
@@ -53,6 +68,19 @@ def generate(text):
     response = requests.post(ur, json=payload, headers=headers)
     result = json.loads(response.text)
     return result['openai']['generated_text']
+def save_feedback(user_id, feedback_text):
+    conn = sqlite3.connect('feedback.db')
+    c = conn.cursor()
+    timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    c.execute("INSERT INTO feedback (user_id, feedback, timestamp) VALUES (?, ?, ?)", (user_id, feedback_text, timestamp))
+    conn.commit()
+    conn.close()
+# Создание клавиатуры для смены языка и других команд
+def create_keyboard():
+    keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+    keyboard.add(telebot.types.KeyboardButton('/lang ru'), telebot.types.KeyboardButton('/lang en'))
+    keyboard.add(telebot.types.KeyboardButton('/help'), telebot.types.KeyboardButton('/start'))
+    return keyboard
 class Text2ImageAPI:
     def __init__(self, url, api_key, secret_key):
         self.URL = url
@@ -99,4 +127,5 @@ class Text2ImageAPI:
         image.save("decoded.jpg")
 if __name__ == '__main__':
     api = Text2ImageAPI('https://api-key.fusionbrain.ai/', 'BB3D504A69D82D56C3A712CD169E1ADC', 'F001625BE2DD4C603995D8CEA8F16476')
-    api.conv("Нейро-кот")
+    init_db()
+    #api.conv("Нейро-кот")
