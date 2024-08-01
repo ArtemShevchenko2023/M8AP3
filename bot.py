@@ -10,66 +10,84 @@ from logic import *
 # Запуск и хэндлеры
 bot = telebot.TeleBot(bot)
 language = 'ru'
-# Создание клавиатуры для смены языка и других команд
-def create_keyboard():
-    keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.add(telebot.types.KeyboardButton('/lang ru'), telebot.types.KeyboardButton('/lang en'))
-    keyboard.add(telebot.types.KeyboardButton('/help'), telebot.types.KeyboardButton('/start'))
-    return keyboard
 # Команда /start с клавиатурой других команд
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     if language == 'ru':
-        welcome_text = "Привет! Для помощи введи /help"
+        welcome_text = "Привет♥! Для помощи введи /help"
     else:
-        welcome_text = "Hello! Type /help for assistance"
+        welcome_text = "Hello♥! Type /help for assistance"
     bot.send_message(message.chat.id, welcome_text, reply_markup=create_keyboard())
 # Команда /help с клавитурой для других команд
 @bot.message_handler(commands=['help'])
 def send_help(message):
     if language == 'ru':
-        help_text = "Вот список моих команд:\n/start - приветствие\n/help - все команды\n/lang - смена языка\n/text - ответ только текстом\n/image - ответ только картинкой\n/prof - опишите что любите делать\n/voice - озвучка сообщения голосом бота\nОтправь любое голосовое сообщение и я отвечу на него!\nНапиши любое сообщение и я отвечу на него!"
+        help_text = "Вот список моих команд:♦\n/start - приветствие\n/help - все команды\n/lang - смена языка\n/text - ответ только текстом\n/image - ответ только картинкой\n/prof - опишите что любите делать\n/voice - озвучка сообщения голосом бота\n/feedback - обратная связь, отзыв\nОтправь любое голосовое сообщение и я отвечу на него!\nНапиши любое сообщение и я отвечу на него!"
     else:
-        help_text = "Here is a list of my commands:\n/start - greeting\n/help - all commands\n/lang - change language\n/text - answer only text\n/image - answer only image\n/prof - describe what you can do\n/voice - convert text in bot voice\nSend me any voice message and I will respond to it!\nSend me any message and I will respond to it!"
+        help_text = "Here is a list of my commands:♦\n/start - greeting\n/help - all commands\n/lang - change language\n/text - answer only text\n/image - answer only image\n/prof - describe what you can do\n/voice - convert text in bot voice\n/feedback - feedback about this project\nSend me any voice message and I will respond to it!\nSend me any message and I will respond to it!"
     bot.send_message(message.chat.id, help_text, reply_markup=create_keyboard())
 # Команда для смены языка
 @bot.message_handler(commands=['lang'])
 def set_language(message):
-    global language
-    if len(message.text.split()) > 1:
-        lang = message.text.split()[1].lower()
-        if lang in ['ru', 'en']:
-            language = lang
-            if language == 'ru':
-                bot.send_message(message.chat.id, "Язык установлен на Русский.")
+    try:
+        global language
+        if len(message.text.split()) > 1:
+            lang = message.text.split()[1].lower()
+            if lang in ['ru', 'en']:
+                language = lang
+                if language == 'ru':
+                    bot.send_message(message.chat.id, "Язык установлен на Русский☻.")
+                else:
+                    bot.send_message(message.chat.id, "Language set to English☺.")
             else:
-                bot.send_message(message.chat.id, "Language set to English.")
+                bot.send_message(message.chat.id, "Пожалуйста, выберите язык♣: /lang ru/en")
         else:
-            bot.send_message(message.chat.id, "Пожалуйста, выберите язык: /lang ru/en")
-    else:
-        bot.send_message(message.chat.id, "Пожалуйста, укажите язык: /lang ru/en\nPlease, enter language: /lang ru/en")
-# Генерирование текста
+            bot.send_message(message.chat.id, "Пожалуйста, укажите язык♣: /lang ru/en\nPlease, enter language♣: /lang ru/en")
+    except Exception:
+        if language == "ru":
+            bot.send_message(message.chat.id, "Что-то пошло не так•")
+        else:
+            bot.send_message(message.chat.id, "Something went wrong•")
+# Генерация текста
 @bot.message_handler(commands=['text'])
 def send_text(message):
-    text = message.text
-    gen = generate(f"{text}")
-    save_request_response(message.from_user.id, text, gen)
-    bot.send_message(message.chat.id, f"{gen}")
-# Генерирование картинок
+    try:
+        text = message.text
+        gen = generate(f"{text}")
+        save_request_response(message.from_user.id, text, gen)
+        bot.send_message(message.chat.id, f"{gen}")
+    except Exception:
+        if language == "ru":
+            bot.send_message(message.chat.id, "Что-то пошло не так•")
+        else:
+            bot.send_message(message.chat.id, "Something went wrong•")
+# Генерация картинок
 @bot.message_handler(commands=['image'])
 def send_img(message):
-    text = message.text
-    api = Text2ImageAPI(fus, ap, secret)
-    api.conv(text)
-    img = open('decoded.jpg', 'rb')
-    bot.send_photo(message.chat.id, img)
+    try:
+        text = message.text
+        api = Text2ImageAPI(fus, ap, secret)
+        api.conv(text)
+        img = open('decoded.jpg', 'rb')
+        bot.send_photo(message.chat.id, img)
+    except Exception:
+        if language == "ru":
+            bot.send_message(message.chat.id, "Что-то пошло не так•")
+        else:
+            bot.send_message(message.chat.id, "Something went wrong•")
 # Выбор профессии, просто перечислите что нравится
 @bot.message_handler(commands=['prof'])
 def send_text(message):
-    text = message.text
-    gen = generate(f"Какая профессия мне подходит? Я занимаюсь {text}!")
-    save_request_response(message.from_user.id, text, gen)
-    bot.send_message(message.chat.id, f"{gen}")
+    try:
+        text = message.text
+        gen = generate(f"Какая профессия мне подходит? Я занимаюсь {text}!")
+        save_request_response(message.from_user.id, text, gen)
+        bot.send_message(message.chat.id, f"{gen}")
+    except Exception:
+        if language == "ru":
+            bot.send_message(message.chat.id, "Что-то пошло не так•")
+        else:
+            bot.send_message(message.chat.id, "Something went wrong•")
 # Обработчик всех голосовых сообщений
 @bot.message_handler(content_types=['voice'])
 def handle_voice(message):
@@ -92,9 +110,9 @@ def handle_voice(message):
                 save_request_response(message.from_user.id, text, gen)
                 bot.send_message(message.chat.id, f"{gen}")
             except sr.UnknownValueError:
-                bot.reply_to(message, "Не удалось распознать аудио.")
+                bot.reply_to(message, "Не удалось распознать аудио◘.")
             except sr.RequestError:
-                bot.reply_to(message, "Ошибка соединения с сервисом.")
+                bot.reply_to(message, "Ошибка соединения с сервисом•.")
         else:
             try:
                 result = recognizer.recognize_google(audio, language='en-US')
@@ -104,9 +122,9 @@ def handle_voice(message):
                 save_request_response(message.from_user.id, text, gen)
                 bot.send_message(message.chat.id, f"{gen}")
             except sr.UnknownValueError:
-                bot.reply_to(message, "Unknown value")
+                bot.reply_to(message, "Unknown value•")
             except sr.RequestError:
-                bot.reply_to(message, "Request error")
+                bot.reply_to(message, "Request error•")
     if os.path.isfile(temp_voice_file):
         os.remove(temp_voice_file)
     if os.path.isfile('voice.wav'):
@@ -128,9 +146,12 @@ def send_voice(message):
                 bot.send_message(message.chat.id, f"{gen}")
                 os.remove('voice_message.mp3')
             else:
-                bot.send_message(message.chat.id, "Ваш текст слишком большой!")
+                bot.send_message(message.chat.id, "Ваш текст слишком большой♠!")
         except Exception as e:
-            bot.send_message(message.chat.id, "Что-то не так, попробуй снова!")
+            if language == "ru":
+                bot.send_message(message.chat.id, "Что-то пошло не так•")
+            else:
+                bot.send_message(message.chat.id, "Something went wrong•")
     else:
         try:
             text = message.text.split(' ', 1)[1]
@@ -145,18 +166,43 @@ def send_voice(message):
                 bot.send_message(message.chat.id, f"{gen}")
                 os.remove('voice_message.mp3')
             else:
-                bot.send_message(message.chat.id, "Your text >= 500!")
+                bot.send_message(message.chat.id, "Your text >= 500!◘")
         except Exception as e:
-            bot.send_message(message.chat.id, "Something went wrong!")
+            if language == "ru":
+                bot.send_message(message.chat.id, "Что-то пошло не так•")
+            else:
+                bot.send_message(message.chat.id, "Something went wrong•")
+# Обратная связь
+@bot.message_handler(commands=['feedback'])
+def feedback(message):
+    try:
+        feedback_text = message.text.split(' ', 1)[1]
+        user_id = message.chat.id
+        save_feedback(user_id, feedback_text)
+        if language == "ru":
+            bot.send_message(chat_id=message.chat.id, text="Ваш отзыв был успешно добавлен в базу данных♥.")
+        else:
+            bot.send_message(chat_id=message.chat.id, text="Your feedback added in DB♥.")
+    except Exception:
+        if language == "ru":
+            bot.send_message(message.chat.id, "Что-то пошло не так•")
+        else:
+            bot.send_message(message.chat.id, "Something went wrong•")
 # Ответ на все текстовые сообщения
 @bot.message_handler(func=lambda message: True)
 def echo_message(message):
-    text = message.text
-    gen = generate(f"{text}")
-    save_request_response(message.from_user.id, text, gen)
-    bot.send_message(message.chat.id, f"{gen}")
-    api = Text2ImageAPI(fus, ap, secret)
-    api.conv(text)
-    img = open('decoded.jpg', 'rb')
-    bot.send_photo(message.chat.id, img)
+    try:
+        text = message.text
+        gen = generate(f"{text}")
+        save_request_response(message.from_user.id, text, gen)
+        bot.send_message(message.chat.id, f"{gen}")
+        api = Text2ImageAPI(fus, ap, secret)
+        api.conv(text)
+        img = open('decoded.jpg', 'rb')
+        bot.send_photo(message.chat.id, img)
+    except Exception:
+        if language == "ru":
+            bot.send_message(message.chat.id, "Что-то пошло не так•")
+        else:
+            bot.send_message(message.chat.id, "Something went wrong•")
 bot.infinity_polling()
